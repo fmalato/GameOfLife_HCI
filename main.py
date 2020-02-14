@@ -1,61 +1,68 @@
 import sys
 from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider
-from PyQt5.QtGui import QPainter, QPixmap, QPen, QBrush
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
+
+from canvas import Canvas
 
 class MainWindow(QMainWindow):
 
-    def __init__(self):
+    def __init__(self, squareEdge, numRows, numCols):
         super().__init__()
+
+        # window
+        self.squareEdge = squareEdge
+        self.numRows = numRows
+        self.numCols = numCols
+
+        # background widget
+        widget = QWidget()
+        self.setCentralWidget(widget)
+        self.setWindowTitle("Conway's Game of Life")
+
+        # canvas
+        pixmap = QPixmap(self.squareEdge * self.numCols + 1, self.squareEdge * self.numRows + 1)
+        pixmap.fill(Qt.white)
+        canvas = Canvas(pixmap, self.squareEdge)
+        canvas.setFixedSize(self.numCols * self.squareEdge + 1, self.numRows * self.squareEdge + 1)
+
+        # button initialization and layout definition (as a list of widgets)
+        labels = ['Start', 'Stop', 'Pause', 'Clear']
+        buttons = [QPushButton(label) for label in labels]
+        buttonLayout = QVBoxLayout()
+        for b in buttons:
+            b.setFixedSize(100, 50)
+            buttonLayout.addWidget(b)
+
+        """Layout has been defined as multiple layouts containing each other, in order to avoid chaotic situations.
+           We could summarize like this: a container contains other container, each of which contains a specific object.
+           This way, I was able to handle the overall layout just like a divs cascade."""
+
+        # two simple boxes: a label and an horizontal slider, aligned horizontally
+        sliderLayout = QHBoxLayout()
+        sliderLayout.addWidget(QLabel('FPS'))
+        sliderLayout.addWidget(QSlider(Qt.Horizontal))
+
+        # canvas is defined as an horizontal layout formed by two containers, containing the Canvas object and a
+        # bunch of buttons respectively
+        canvasLayout = QHBoxLayout()
+        canvasLayout.addWidget(canvas)
+        canvasLayout.addLayout(buttonLayout)
+
+        # this is the highest-level layout, that contains both the canvas and the slider in a vertical fashion
+        layout = QVBoxLayout()
+        layout.addLayout(sliderLayout)
+        layout.addLayout(canvasLayout)
+        widget.setLayout(layout)
+
+        # finally, the canvas can draw the grid
+        canvas.drawGrid(30, 40)
 
 
 if __name__ == '__main__':
 
     app = QApplication(sys.argv)
 
-    squareEdge = 15
-    numCols = 30
-    numRows = 20
-
-    widg = QLabel()
-    widg.setFixedSize(numCols * squareEdge + 1, numRows * squareEdge + 1)
-    window = QMainWindow()
-    widget = QWidget()
-
-    window.setCentralWidget(widget)
-    layout = QVBoxLayout()
-    sliderLayout = QHBoxLayout()
-    canvasLayout = QHBoxLayout()
-    buttonLayout = QVBoxLayout()
-    canvasLayout.addWidget(widg)
-    sliderLayout.addWidget(QLabel('FPS'))
-    sliderLayout.addWidget(QSlider(Qt.Horizontal))
-    layout.addLayout(sliderLayout)
-    layout.addLayout(canvasLayout)
-    labels = ['Start', 'Stop', 'Pause', 'Clear']
-    buttons = [QPushButton(label) for label in labels]
-    for b in buttons:
-        buttonLayout.addWidget(b)
-    canvasLayout.addLayout(buttonLayout)
-    window.setWindowTitle("Conway's Game of Life")
-    pixmap = QPixmap(squareEdge * numCols + 1, squareEdge * numRows + 1)
-    pixmap.fill(Qt.white)
-    widg.setPixmap(pixmap)
-    widg.setStyleSheet('background-color: white;')
-    painter = QPainter(widg.pixmap())
-    painter.setPen(QPen(Qt.black))
-    painter.setBrush(QBrush(Qt.green))
-    x = 0
-    y = 0
-    for i in range(numRows + 1):
-        painter.drawLine(0, y, squareEdge * numCols, y)
-        y += squareEdge
-    for j in range(numCols + 1):
-        painter.drawLine(x, 0, x, squareEdge * numRows)
-        x += squareEdge
-    painter.drawRect(squareEdge * 4, squareEdge * 5, squareEdge, squareEdge)
-    painter.drawRect(squareEdge * 12, squareEdge * 9, squareEdge, squareEdge)
-    widget.setLayout(layout)
-
+    window = MainWindow(15, 30, 40)
     window.show()
     app.exec_()
