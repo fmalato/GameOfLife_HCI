@@ -3,6 +3,12 @@ from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QWidget, QPushBut
 from PyQt5.QtGui import QPainter, QPixmap, QPen, QBrush
 from PyQt5.QtCore import Qt
 
+class MainWindow(QMainWindow):
+
+    def __init__(self):
+        super().__init__()
+
+
 if __name__ == '__main__':
 
     app = QApplication(sys.argv)
@@ -38,7 +44,7 @@ if __name__ == '__main__':
     widg.setStyleSheet('background-color: white;')
     painter = QPainter(widg.pixmap())
     painter.setPen(QPen(Qt.black))
-    painter.setBrush(QBrush(Qt.black))
+    painter.setBrush(QBrush(Qt.green))
     x = 0
     y = 0
     for i in range(numRows + 1):
@@ -47,6 +53,8 @@ if __name__ == '__main__':
     for j in range(numCols + 1):
         painter.drawLine(x, 0, x, squareEdge * numRows)
         x += squareEdge
+    painter.drawRect(squareEdge * 4, squareEdge * 5, squareEdge, squareEdge)
+    painter.drawRect(squareEdge * 12, squareEdge * 9, squareEdge, squareEdge)
     widget.setLayout(layout)
 
     window.show()
