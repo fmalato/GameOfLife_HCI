@@ -17,13 +17,16 @@ class Canvas(QLabel):
         self.pixmapWidth = self.pixmap().width()
         self.pixmapHeight = self.pixmap().height()
 
-        # also, in order to paint, you need a painter
+        # also, in order to paint, first you need a painter
         self.painter = QPainter(self.pixmap())
         self.painter.setPen(QPen(Qt.black))
         self.painter.setBrush(QBrush(Qt.green))
 
         # an attribute to have memory of all the colored positions
         self.coloredPositions = []
+        # 2D Array to determine the next generation
+        self.colored = [[0 for x in range((int)(self.pixmapWidth / self.squareEdge))]
+                        for y in range((int)(self.pixmapHeight / self.squareEdge))]
 
     def mousePressEvent(self, ev: QMouseEvent):
         # by getting the attributes and knowing the length of the edge of a grid square, it is possible to
@@ -36,12 +39,10 @@ class Canvas(QLabel):
 
         if (row, col) not in self.coloredPositions:
             # now the painter actually draws the rectangle in the desired position
-            self.coloredPositions.append((row, col))
-            self.painter.drawRect(col * self.squareEdge, row * self.squareEdge, self.squareEdge, self.squareEdge)
+            self.drawRect(row, col)
         else:
             # if the selected position is already colored, by clicking on it we can erase the drawn rectangle
-            self.coloredPositions.remove((row, col))
-            self.painter.eraseRect(col * self.squareEdge + 1, row * self.squareEdge + 1, self.squareEdge - 1, self.squareEdge - 1)
+            self.eraseRect(row, col)
 
         # to make the colored square appear, we need to update the window
         self.window().update()
@@ -57,3 +58,22 @@ class Canvas(QLabel):
         for j in range(numCols + 1):
             self.painter.drawLine(x, 0, x, self.squareEdge * numRows)
             x += self.squareEdge
+
+    def drawRect(self, row, col):
+        self.coloredPositions.append((row, col))
+        self.colored[row][col] = 1
+        self.painter.drawRect(col * self.squareEdge, row * self.squareEdge, self.squareEdge, self.squareEdge)
+
+    def eraseRect(self, row, col):
+        self.coloredPositions.remove((row, col))
+        self.colored[row][col] = 0
+        self.painter.eraseRect(col * self.squareEdge + 1, row * self.squareEdge + 1, self.squareEdge - 1,
+                               self.squareEdge - 1)
+
+    def clearAll(self):
+        for p in self.coloredPositions:
+            self.painter.eraseRect(p[1] * self.squareEdge + 1, p[0] * self.squareEdge + 1, self.squareEdge - 1,
+                                   self.squareEdge - 1)
+            self.colored[p[0]][p[1]] = 0
+        self.coloredPositions = []
+
