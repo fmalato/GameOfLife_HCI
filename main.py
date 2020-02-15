@@ -3,6 +3,7 @@ import sys
 from app import GameOfLife
 from window import MainWindow
 
+
 if __name__ == '__main__':
 
     app = GameOfLife(sys.argv)

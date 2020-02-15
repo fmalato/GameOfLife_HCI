@@ -1,9 +1,9 @@
-from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider
+from PyQt5.QtWidgets import QLabel, QMainWindow, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
 from canvas import Canvas
-from clearButton import ClearButton
+from buttons import StartButton, StepButton, StopButton, ClearButton
 
 
 class MainWindow(QMainWindow):
@@ -28,9 +28,12 @@ class MainWindow(QMainWindow):
         canvas.setFixedSize(self.numCols * self.squareEdge + 1, self.numRows * self.squareEdge + 1)
 
         # buttons initialization and layout definition (as a list of widgets)
-        labels = ['Start', 'Pause', 'Step', 'Stop']
-        buttons = [QPushButton(label) for label in labels]
-        buttons.append(ClearButton('Clear', canvas))
+        buttons = []
+        start = StartButton(canvas)
+        buttons.append(start)
+        buttons.append(StopButton(start.timer))
+        buttons.append(StepButton(canvas))
+        buttons.append(ClearButton(canvas))
         buttonLayout = QVBoxLayout()
         for b in buttons:
             b.setFixedSize(100, 50)
@@ -58,4 +61,4 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
 
         # finally, the canvas can draw the grid
-        canvas.drawGrid(30, 40)
+        canvas.drawGrid(numRows, numCols)

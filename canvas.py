@@ -25,8 +25,8 @@ class Canvas(QLabel):
         # an attribute to have memory of all the colored positions
         self.coloredPositions = []
         # 2D Array to determine the next generation
-        self.colored = [[0 for x in range((int)(self.pixmapWidth / self.squareEdge))]
-                        for y in range((int)(self.pixmapHeight / self.squareEdge))]
+        self.colored = [[0 for x in range(int(self.pixmapWidth / self.squareEdge))]
+                        for y in range(int(self.pixmapHeight / self.squareEdge))]
 
     def mousePressEvent(self, ev: QMouseEvent):
         # by getting the attributes and knowing the length of the edge of a grid square, it is possible to
@@ -34,8 +34,8 @@ class Canvas(QLabel):
         clickPosition = ev.pos()
         clickPosX = clickPosition.x()
         clickPosY = clickPosition.y()
-        col = (int)(clickPosX / self.squareEdge)
-        row = (int)(clickPosY / self.squareEdge)
+        col = int(clickPosX / self.squareEdge)
+        row = int(clickPosY / self.squareEdge)
 
         if (row, col) not in self.coloredPositions:
             # now the painter actually draws the rectangle in the desired position
@@ -61,6 +61,7 @@ class Canvas(QLabel):
 
     def drawRect(self, row, col):
         self.coloredPositions.append((row, col))
+        self.coloredPositions = list(set(self.coloredPositions))
         self.colored[row][col] = 1
         self.painter.drawRect(col * self.squareEdge, row * self.squareEdge, self.squareEdge, self.squareEdge)
 
@@ -76,4 +77,28 @@ class Canvas(QLabel):
                                    self.squareEdge - 1)
             self.colored[p[0]][p[1]] = 0
         self.coloredPositions = []
+        self.window().update()
 
+    def countNeighbors(self, row, col):
+        count = 0
+        for i in range(-1, 2, 1):
+            for j in range(-1, 2, 1):
+                if self.colored[row + i][col + j] == 1:
+                    count += 1
+        # it also counts itself, so you have to subtract one
+        return count - 1
+
+    """ Any live cell with fewer than two live neighbours dies, as if by underpopulation.
+        Any live cell with two or three live neighbours lives on to the next generation.
+        Any live cell with more than three live neighbours dies, as if by overpopulation.
+        Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction."""
+    def updateCells(self):
+        tmp = self.coloredPositions
+        for p in tmp:
+            numNeighbors = self.countNeighbors(p[0], p[1])
+            if numNeighbors < 2 or numNeighbors > 3:
+                self.eraseRect(p[0], p[1])
+            if numNeighbors == 3:
+                self.drawRect(p[0] + 1, p[1])
+        print(self.coloredPositions)
+        self.window().update()
