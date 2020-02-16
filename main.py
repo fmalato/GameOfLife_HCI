@@ -8,6 +8,6 @@ if __name__ == '__main__':
 
     app = GameOfLife(sys.argv)
 
-    window = MainWindow(15, 30, 40)
+    window = MainWindow(10, 60, 80)
     window.show()
     app.exec_()

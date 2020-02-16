@@ -3,7 +3,8 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
 from canvas import Canvas
-from buttons import StartButton, StepButton, StopButton, ClearButton
+from buttons import StartButton, StepButton, StopButton, ClearButton, KnownPatternsBox
+from slider import FPSSlider
 
 
 class MainWindow(QMainWindow):
@@ -34,6 +35,7 @@ class MainWindow(QMainWindow):
         buttons.append(StopButton(start.timer))
         buttons.append(StepButton(canvas))
         buttons.append(ClearButton(canvas))
+        buttons.append(KnownPatternsBox(canvas))
         buttonLayout = QVBoxLayout()
         for b in buttons:
             b.setFixedSize(100, 50)
@@ -45,8 +47,14 @@ class MainWindow(QMainWindow):
 
         # two simple boxes: a label and an horizontal slider, aligned horizontally
         sliderLayout = QHBoxLayout()
-        sliderLayout.addWidget(QLabel('FPS'))
-        sliderLayout.addWidget(QSlider(Qt.Horizontal))
+        fpsLabel = QLabel('FPS:')
+        fpsLabel.setFixedWidth(30)
+        minLabel = QLabel('1')
+        minLabel.setFixedWidth(10)
+        sliderLayout.addWidget(fpsLabel)
+        sliderLayout.addWidget(minLabel)
+        sliderLayout.addWidget(FPSSlider(start))
+        sliderLayout.addWidget(QLabel('60'))
 
         # canvas is defined as an horizontal layout formed by two containers, containing the Canvas object and a
         # bunch of buttons respectively

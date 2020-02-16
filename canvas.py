@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QMouseEvent, QPainter, QPen, QBrush
 from PyQt5.QtWidgets import QLabel
@@ -25,8 +27,10 @@ class Canvas(QLabel):
         # an attribute to have memory of all the colored positions
         self.coloredPositions = []
         # 2D Array to determine the next generation
-        self.colored = [[0 for x in range(int(self.pixmapWidth / self.squareEdge))]
-                        for y in range(int(self.pixmapHeight / self.squareEdge))]
+        self.numRows = int(self.pixmapHeight / self.squareEdge)
+        self.numCols = int(self.pixmapWidth / self.squareEdge)
+        self.colored = [[0 for x in range(self.numCols)]
+                        for y in range(self.numRows)]
 
     def mousePressEvent(self, ev: QMouseEvent):
         # by getting the attributes and knowing the length of the edge of a grid square, it is possible to
@@ -79,26 +83,34 @@ class Canvas(QLabel):
         self.coloredPositions = []
         self.window().update()
 
-    def countNeighbors(self, row, col):
+    def countNeighbors(self, row, col, colored, blank=False):
         count = 0
         for i in range(-1, 2, 1):
             for j in range(-1, 2, 1):
-                if self.colored[row + i][col + j] == 1:
+                if colored[row + i][col + j] == 1:
                     count += 1
         # it also counts itself, so you have to subtract one
-        return count - 1
+        if not blank:
+            return count - 1
+        else:
+            return count
 
     """ Any live cell with fewer than two live neighbours dies, as if by underpopulation.
         Any live cell with two or three live neighbours lives on to the next generation.
         Any live cell with more than three live neighbours dies, as if by overpopulation.
         Any dead cell with exactly three live neighbours becomes a live cell, as if by reproduction."""
     def updateCells(self):
-        tmp = self.coloredPositions
+        tmp = deepcopy(self.coloredPositions)
+        tmp_colored = deepcopy(self.colored)
+        for r in range(self.numRows - 1):
+            for c in range(self.numCols - 1):
+                if self.colored[r][c] == 0:
+                    numNeighs = self.countNeighbors(r, c, tmp_colored, True)
+                    if numNeighs == 3:
+                        self.drawRect(r, c)
         for p in tmp:
-            numNeighbors = self.countNeighbors(p[0], p[1])
+            numNeighbors = self.countNeighbors(p[0], p[1], tmp_colored, False)
             if numNeighbors < 2 or numNeighbors > 3:
                 self.eraseRect(p[0], p[1])
-            if numNeighbors == 3:
-                self.drawRect(p[0] + 1, p[1])
-        print(self.coloredPositions)
+
         self.window().update()
