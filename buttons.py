@@ -59,6 +59,7 @@ class KnownPatternsBox(QComboBox, QObject):
     def __init__(self, canvas):
         super().__init__()
         self.patterns = []
+        # EXTRA TASK: LOADING OF INITIAL STATE
         with open('patterns.json', 'r') as f:
             self.jsonData = json.load(f)
             self.patternsNames = list(self.jsonData.keys())
@@ -69,12 +70,19 @@ class KnownPatternsBox(QComboBox, QObject):
 
     def drawPattern(self):
         index = self.currentIndex()
-        self.patterns = self.jsonData[self.patternsNames[index]]
+        self.patterns = self.jsonData[self.patternsNames[index]]["pattern"]
+        posX = self.jsonData[self.patternsNames[index]]["position"][0]
+        posY = self.jsonData[self.patternsNames[index]]["position"][1]
+        shapeX = self.jsonData[self.patternsNames[index]]["shape"][0]
+        shapeY = self.jsonData[self.patternsNames[index]]["shape"][1]
         self.canvas.clearAll()
-        for r in range(self.patterns.__len__()):
-            for c in range(self.patterns[r].__len__()):
-                if self.patterns[r][c] == 1:
-                    self.canvas.drawRect(r + 5, c + 5)
+        if self.canvas.numCols >= shapeX + posX and self.canvas.numRows >= shapeY + posY:
+            for r in range(self.patterns.__len__()):
+                for c in range(self.patterns[r].__len__()):
+                    if self.patterns[r][c] == 1:
+                        self.canvas.drawRect(r + posX, c + posY)
+        else:
+            print('Cannot draw pattern: the grid is too small.')
         self.canvas.window().update()
 
 
