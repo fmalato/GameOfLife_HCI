@@ -1,8 +1,8 @@
-from PyQt5.QtWidgets import QLabel, QMainWindow, QWidget, QPushButton, QHBoxLayout, QVBoxLayout, QSlider
+from PyQt5.QtWidgets import QLabel, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
-from canvas import Canvas
+from canvas import CanvasModel, CanvasView, CanvasController
 from buttons import StartButton, StepButton, StopButton, ClearButton, KnownPatternsBox
 from slider import FPSSlider
 
@@ -25,17 +25,20 @@ class MainWindow(QMainWindow):
         # canvas
         pixmap = QPixmap(self.squareEdge * self.numCols + 1, self.squareEdge * self.numRows + 1)
         pixmap.fill(Qt.white)
-        canvas = Canvas(pixmap, self.squareEdge)
+        canvasModel = CanvasModel(self.squareEdge, pixmap.width(), pixmap.height())
+        canvasController = CanvasController(canvasModel)
+        canvas = CanvasView(pixmap, canvasController)
+        canvasModel.subscribe(canvas)
         canvas.setFixedSize(self.numCols * self.squareEdge + 1, self.numRows * self.squareEdge + 1)
 
         # buttons initialization and layout definition (as a list of widgets)
         buttons = []
-        start = StartButton(canvas)
+        start = StartButton(canvasController)
         buttons.append(start)
         buttons.append(StopButton(start.timer))
-        buttons.append(StepButton(canvas))
-        buttons.append(ClearButton(canvas))
-        buttons.append(KnownPatternsBox(canvas))
+        buttons.append(StepButton(canvasController))
+        buttons.append(ClearButton(canvasController))
+        buttons.append(KnownPatternsBox(canvasController))
         buttonLayout = QVBoxLayout()
         for b in buttons:
             b.setFixedSize(100, 50)
@@ -54,7 +57,7 @@ class MainWindow(QMainWindow):
         sliderLayout.addWidget(fpsLabel)
         sliderLayout.addWidget(minLabel)
         sliderLayout.addWidget(FPSSlider(start))
-        sliderLayout.addWidget(QLabel('60'))
+        sliderLayout.addWidget(QLabel('20'))
 
         # canvas is defined as an horizontal layout formed by two containers, containing the Canvas object and a
         # bunch of buttons respectively
@@ -69,4 +72,4 @@ class MainWindow(QMainWindow):
         widget.setLayout(layout)
 
         # finally, the canvas can draw the grid
-        canvas.drawGrid(numRows, numCols)
+        canvas.drawGrid()

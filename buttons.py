@@ -24,10 +24,10 @@ class StartButton(QPushButton):
 
 class StepButton(QPushButton, QObject):
 
-    def __init__(self, canvas):
+    def __init__(self, canvasController):
         super().__init__('Step')
-        self.canvas = canvas
-        self.clicked.connect(self.canvas.updateCells)
+        self.canvasController = canvasController
+        self.clicked.connect(self.canvasController.updateCells)
 
     def mousePressEvent(self, e: QMouseEvent):
         super().mousePressEvent(e)
@@ -46,17 +46,17 @@ class StopButton(QPushButton, QObject):
 
 class ClearButton(QPushButton, QObject):
 
-    def __init__(self, canvas):
+    def __init__(self, canvasController):
         super().__init__('Clear')
-        self.canvas = canvas
+        self.canvasController = canvasController
 
     def mousePressEvent(self, e: QMouseEvent):
-        self.clicked.connect(self.canvas.clearAll)
+        self.clicked.connect(self.canvasController.clearAll)
         super().mousePressEvent(e)
 
 class KnownPatternsBox(QComboBox, QObject):
 
-    def __init__(self, canvas):
+    def __init__(self, canvasController):
         super().__init__()
         self.patterns = []
         # EXTRA TASK: LOADING OF INITIAL STATE
@@ -65,7 +65,7 @@ class KnownPatternsBox(QComboBox, QObject):
             self.patternsNames = list(self.jsonData.keys())
         for el in self.patternsNames:
             self.addItem(el)
-        self.canvas = canvas
+        self.canvasController = canvasController
         self.activated.connect(self.drawPattern)
 
     def drawPattern(self):
@@ -75,15 +75,14 @@ class KnownPatternsBox(QComboBox, QObject):
         posY = self.jsonData[self.patternsNames[index]]["position"][1]
         shapeX = self.jsonData[self.patternsNames[index]]["shape"][0]
         shapeY = self.jsonData[self.patternsNames[index]]["shape"][1]
-        self.canvas.clearAll()
-        if self.canvas.numCols >= shapeX + posX and self.canvas.numRows >= shapeY + posY:
+        self.canvasController.clearAll()
+        if self.canvasController.getNumCols() >= shapeX + posX and self.canvasController.getNumRows() >= shapeY + posY:
             for r in range(self.patterns.__len__()):
                 for c in range(self.patterns[r].__len__()):
                     if self.patterns[r][c] == 1:
-                        self.canvas.drawRect(r + posX, c + posY)
+                        self.canvasController.updatePositions(r + posX, c + posY)
         else:
             print('Cannot draw pattern: the grid is too small.')
-        self.canvas.window().update()
 
 
 
