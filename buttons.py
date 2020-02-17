@@ -7,11 +7,11 @@ from PyQt5.QtWidgets import QPushButton, QComboBox
 
 class StartButton(QPushButton):
 
-    def __init__(self, canvas):
+    def __init__(self, controller):
         super().__init__('Start')
         self.timer = QTimer()
-        self.canvas = canvas
-        self.timer.timeout.connect(self.canvas.updateCells)
+        self.controller = controller
+        self.timer.timeout.connect(self.controller.updateCells)
         self.fps = 1
 
     def mousePressEvent(self, e: QMouseEvent):
@@ -20,14 +20,16 @@ class StartButton(QPushButton):
 
     def setFps(self, value):
         self.fps = value
+        self.timer.stop()
+        self.timer.start(1000 * (1 / self.fps))
 
 
 class StepButton(QPushButton, QObject):
 
-    def __init__(self, canvasController):
+    def __init__(self, controller):
         super().__init__('Step')
-        self.canvasController = canvasController
-        self.clicked.connect(self.canvasController.updateCells)
+        self.controller = controller
+        self.clicked.connect(self.controller.updateCells)
 
     def mousePressEvent(self, e: QMouseEvent):
         super().mousePressEvent(e)
@@ -46,17 +48,17 @@ class StopButton(QPushButton, QObject):
 
 class ClearButton(QPushButton, QObject):
 
-    def __init__(self, canvasController):
+    def __init__(self, controller):
         super().__init__('Clear')
-        self.canvasController = canvasController
+        self.controller = controller
 
     def mousePressEvent(self, e: QMouseEvent):
-        self.clicked.connect(self.canvasController.clearAll)
+        self.clicked.connect(self.controller.clearAll)
         super().mousePressEvent(e)
 
 class KnownPatternsBox(QComboBox, QObject):
 
-    def __init__(self, canvasController):
+    def __init__(self, controller):
         super().__init__()
         self.patterns = []
         # EXTRA TASK: LOADING OF INITIAL STATE
@@ -65,7 +67,7 @@ class KnownPatternsBox(QComboBox, QObject):
             self.patternsNames = list(self.jsonData.keys())
         for el in self.patternsNames:
             self.addItem(el)
-        self.canvasController = canvasController
+        self.controller = controller
         self.activated.connect(self.drawPattern)
 
     def drawPattern(self):
@@ -75,12 +77,12 @@ class KnownPatternsBox(QComboBox, QObject):
         posY = self.jsonData[self.patternsNames[index]]["position"][1]
         shapeX = self.jsonData[self.patternsNames[index]]["shape"][0]
         shapeY = self.jsonData[self.patternsNames[index]]["shape"][1]
-        self.canvasController.clearAll()
-        if self.canvasController.getNumCols() >= shapeX + posX and self.canvasController.getNumRows() >= shapeY + posY:
+        self.controller.clearAll()
+        if self.controller.getNumCols() >= shapeX + posX and self.controller.getNumRows() >= shapeY + posY:
             for r in range(self.patterns.__len__()):
                 for c in range(self.patterns[r].__len__()):
                     if self.patterns[r][c] == 1:
-                        self.canvasController.updatePositions(r + posX, c + posY)
+                        self.controller.updatePositions(r + posX, c + posY)
         else:
             print('Cannot draw pattern: the grid is too small.')
 

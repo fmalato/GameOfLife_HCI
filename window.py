@@ -2,7 +2,8 @@ from PyQt5.QtWidgets import QLabel, QMainWindow, QWidget, QHBoxLayout, QVBoxLayo
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
-from canvas import CanvasModel, CanvasView, CanvasController
+from canvas import CanvasView
+from controller import Controller, Model
 from buttons import StartButton, StepButton, StopButton, ClearButton, KnownPatternsBox
 from slider import FPSSlider
 
@@ -25,20 +26,20 @@ class MainWindow(QMainWindow):
         # canvas
         pixmap = QPixmap(self.squareEdge * self.numCols + 1, self.squareEdge * self.numRows + 1)
         pixmap.fill(Qt.white)
-        canvasModel = CanvasModel(self.squareEdge, pixmap.width(), pixmap.height())
-        canvasController = CanvasController(canvasModel)
-        canvas = CanvasView(pixmap, canvasController)
-        canvasModel.subscribe(canvas)
+        model = Model(self.squareEdge, pixmap.width(), pixmap.height())
+        canvas = CanvasView(pixmap, model)
+        controller = Controller(model, canvas)
+        canvas.addController(controller)
         canvas.setFixedSize(self.numCols * self.squareEdge + 1, self.numRows * self.squareEdge + 1)
 
         # buttons initialization and layout definition (as a list of widgets)
         buttons = []
-        start = StartButton(canvasController)
+        start = StartButton(controller)
         buttons.append(start)
         buttons.append(StopButton(start.timer))
-        buttons.append(StepButton(canvasController))
-        buttons.append(ClearButton(canvasController))
-        buttons.append(KnownPatternsBox(canvasController))
+        buttons.append(StepButton(controller))
+        buttons.append(ClearButton(controller))
+        buttons.append(KnownPatternsBox(controller))
         buttonLayout = QVBoxLayout()
         for b in buttons:
             b.setFixedSize(100, 50)
@@ -57,7 +58,7 @@ class MainWindow(QMainWindow):
         sliderLayout.addWidget(fpsLabel)
         sliderLayout.addWidget(minLabel)
         sliderLayout.addWidget(FPSSlider(start))
-        sliderLayout.addWidget(QLabel('20'))
+        sliderLayout.addWidget(QLabel('30'))
 
         # canvas is defined as an horizontal layout formed by two containers, containing the Canvas object and a
         # bunch of buttons respectively

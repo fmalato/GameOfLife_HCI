@@ -8,7 +8,7 @@ class FPSSlider(QSlider):
     def __init__(self, startButton):
         super().__init__(Qt.Horizontal)
         self.setMinimum(1)
-        self.setMaximum(20)
+        self.setMaximum(30)
         self.setFixedWidth(400)
         self.startButton = startButton
 
