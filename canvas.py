@@ -11,7 +11,7 @@ class CanvasView(QLabel):
         self.model = model
         self.controller = None
 
-        # initial state
+        # initial state, inconsistent if there's no controller
         self.numRows = 0
         self.numCols = 0
         self.squareEdge = 0
@@ -32,6 +32,12 @@ class CanvasView(QLabel):
         self.painter.setPen(QPen(Qt.black))
         self.painter.setBrush(QBrush(Qt.green))
 
+    """
+        This has to be called right after the View object is instantiated. It works like a "subscribe()" method:
+        a Controller subscribes to its View in order to get the user's inputs. To be a proper "subscribe()"
+        method the View should have a list of controllers but, since this app just requires one, I thought it
+        wouldn't have been necessary to mess up things.
+    """
     def addController(self, controller):
         self.controller = controller
 
@@ -77,18 +83,5 @@ class CanvasView(QLabel):
             self.eraseRect(p[0], p[1])
 
         self.window().update()
-
-    def notifyDraw(self, create, row, col):
-        if create:
-            self.drawRect(row, col)
-        else:
-            self.eraseRect(row, col)
-
-    def redraw(self):
-        self.window().update()
-
-    def notifyState(self):
-        self.coloredPosition = self.controller.getColoredPositions()
-        self.colored = self.controller.getColored()
 
 

@@ -3,7 +3,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
 from canvas import CanvasView
-from controller import Controller, Model
+from MVC import Controller, Model
 from buttons import StartButton, StepButton, StopButton, ClearButton, KnownPatternsBox
 from slider import FPSSlider
 
@@ -28,8 +28,10 @@ class MainWindow(QMainWindow):
         pixmap.fill(Qt.white)
         model = Model(self.squareEdge, pixmap.width(), pixmap.height())
         canvas = CanvasView(pixmap, model)
-        controller = Controller(model, canvas)
+        knownPatternBox = KnownPatternsBox(model)
+        controller = Controller(model, canvas, knownPatternBox)
         canvas.addController(controller)
+        knownPatternBox.addController(controller)
         canvas.setFixedSize(self.numCols * self.squareEdge + 1, self.numRows * self.squareEdge + 1)
 
         # buttons initialization and layout definition (as a list of widgets)
@@ -39,17 +41,19 @@ class MainWindow(QMainWindow):
         buttons.append(StopButton(start.timer))
         buttons.append(StepButton(controller))
         buttons.append(ClearButton(controller))
-        buttons.append(KnownPatternsBox(controller))
+        buttons.append(knownPatternBox)
         buttonLayout = QVBoxLayout()
         for b in buttons:
             b.setFixedSize(100, 50)
             buttonLayout.addWidget(b)
 
-        """Layout has been defined as multiple layouts containing each other, in order to avoid chaotic situations.
-           We could summarize like this: a container contains other container, each of which contains a specific object.
-           This way, I was able to handle the overall layout just like a divs cascade."""
+        """
+            Layout has been defined as multiple layouts containing each other, in order to avoid chaotic situations.
+            We could summarize like this: a container contains other containers, each of which contains a specific 
+            object. This way I was able to handle the overall layout just like a divs cascade.
+        """
 
-        # two simple boxes: a label and an horizontal slider, aligned horizontally
+        # two simple boxes: three labels and an FPSSlider, all aligned horizontally
         sliderLayout = QHBoxLayout()
         fpsLabel = QLabel('FPS:')
         fpsLabel.setFixedWidth(30)
@@ -58,7 +62,7 @@ class MainWindow(QMainWindow):
         sliderLayout.addWidget(fpsLabel)
         sliderLayout.addWidget(minLabel)
         sliderLayout.addWidget(FPSSlider(start))
-        sliderLayout.addWidget(QLabel('30'))
+        sliderLayout.addWidget(QLabel('60'))
 
         # canvas is defined as an horizontal layout formed by two containers, containing the Canvas object and a
         # bunch of buttons respectively
