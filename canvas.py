@@ -1,6 +1,6 @@
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QMouseEvent, QPainter, QPen, QBrush
-from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QLabel, QScrollArea
 
 
 class CanvasView(QLabel):
@@ -83,5 +83,17 @@ class CanvasView(QLabel):
             self.eraseRect(p[0], p[1])
 
         self.window().update()
+
+
+class CanvasScrollArea(QScrollArea):
+
+    def __init__(self, canvas, width, height):
+        super().__init__()
+        self.setWidgetResizable(True)
+        self.setWidget(canvas)
+        self.setFixedSize(width, height)
+
+
+
 
 

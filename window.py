@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QLabel, QMainWindow, QWidget, QHBoxLayout, QVBoxLayo
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
-from canvas import CanvasView
+from canvas import CanvasView, CanvasScrollArea
 from MVC import Controller, Model
 from buttons import StartButton, StepButton, StopButton, ClearButton, KnownPatternsBox
 from slider import FPSSlider
@@ -32,7 +32,9 @@ class MainWindow(QMainWindow):
         controller = Controller(model, canvas, knownPatternBox)
         canvas.addController(controller)
         knownPatternBox.addController(controller)
-        canvas.setFixedSize(self.numCols * self.squareEdge + 1, self.numRows * self.squareEdge + 1)
+        #canvas.setFixedSize(self.numCols * self.squareEdge + 1, self.numRows * self.squareEdge + 1)
+        scroll = CanvasScrollArea(canvas, self.numCols * self.squareEdge + 1, self.numRows * self.squareEdge + 1)
+
 
         # buttons initialization and layout definition (as a list of widgets)
         buttons = []
@@ -67,7 +69,7 @@ class MainWindow(QMainWindow):
         # canvas is defined as an horizontal layout formed by two containers, containing the Canvas object and a
         # bunch of buttons respectively
         canvasLayout = QHBoxLayout()
-        canvasLayout.addWidget(canvas)
+        canvasLayout.addWidget(scroll)
         canvasLayout.addLayout(buttonLayout)
 
         # this is the highest-level layout, that contains both the canvas and the slider in a vertical fashion
