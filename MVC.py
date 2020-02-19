@@ -4,6 +4,8 @@ import numpy as np
 from copy import deepcopy
 from abc import ABCMeta, abstractmethod
 
+from PyQt5.QtWidgets import QMessageBox
+
 """
     The Model of the MVC implementation is used to retain the useful data (it should be linked to a DB or something
     like that, but since there are a few data I didn't want to overkill it) and to dispatch them to the various 
@@ -137,7 +139,7 @@ class Model:
                     if pattern[r][c] == 1:
                         self.appendPosition(r + posX, c + posY)
         else:
-            print('Cannot draw pattern: the grid is too small.')
+            self.showErrorPopup()
 
         return deepcopy(self.coloredPositions)
 
@@ -146,6 +148,12 @@ class Model:
             self.jsonData = json.load(f)
             self.patternsNames = list(self.jsonData.keys())
             return deepcopy(self.patternsNames)
+
+    def showErrorPopup(self):
+        msg = QMessageBox()
+        msg.setWindowTitle('Error')
+        msg.setText('Cannot draw pattern: the grid is too small.')
+        msg.exec_()
 
 
 """

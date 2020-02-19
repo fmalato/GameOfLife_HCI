@@ -1,5 +1,5 @@
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QMouseEvent, QPainter, QPen, QBrush
+from PyQt5.QtGui import QMouseEvent, QPainter, QPen, QBrush, QPalette
 from PyQt5.QtWidgets import QLabel, QScrollArea
 
 
@@ -92,6 +92,7 @@ class CanvasScrollArea(QScrollArea):
         self.setWidgetResizable(True)
         self.setWidget(canvas)
         self.setFixedSize(width, height)
+
 
 
 
