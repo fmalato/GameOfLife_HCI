@@ -16,8 +16,11 @@ class CanvasView(QLabel):
         self.numCols = 0
         self.squareEdge = 0
 
+        self.oldPos = []
         self.coloredPosition = []
         self.colored = []
+
+        self.history = False
 
         # some standard attributes initializations
         self.setStyleSheet("background-color: white;")
@@ -30,7 +33,19 @@ class CanvasView(QLabel):
         # also, in order to paint, first you need a painter
         self.painter = QPainter(self.pixmap())
         self.painter.setPen(QPen(Qt.black))
-        self.painter.setBrush(QBrush(Qt.green))
+        self.brush = QBrush(Qt.green)
+        self.oldBrush = QBrush(Qt.red)
+        self.painter.setBrush(self.brush)
+
+    def setHistory(self):
+        self.history = not self.history
+        if not self.history:
+            self.oldPos = self.controller.getOldPos()
+            for el in self.oldPos:
+                self.eraseRect(el[0], el[1])
+            self.coloredPosition = self.controller.getColoredPositions()
+            for el in self.coloredPosition:
+                self.drawRect(el[0], el[1], True)
 
     """
         This has to be called right after the View object is instantiated. It works like a "subscribe()" method:
@@ -45,6 +60,7 @@ class CanvasView(QLabel):
         self.numCols = self.controller.getNumCols()
         self.squareEdge = self.controller.getSquareEdge()
 
+        self.oldPos = self.controller.getOldPos()
         self.coloredPosition = self.controller.getColoredPositions()
         self.colored = self.controller.getColored()
 
@@ -69,7 +85,11 @@ class CanvasView(QLabel):
             self.painter.drawLine(x, 0, x, self.squareEdge * self.numRows)
             x += self.squareEdge
 
-    def drawRect(self, row, col):
+    def drawRect(self, row, col, isNew):
+        if isNew:
+            self.painter.setBrush(self.brush)
+        else:
+            self.painter.setBrush(self.oldBrush)
         self.painter.drawRect(col * self.squareEdge, row * self.squareEdge, self.squareEdge, self.squareEdge)
         self.window().update()
 
@@ -79,6 +99,8 @@ class CanvasView(QLabel):
         self.window().update()
 
     def clearAll(self):
+        for op in self.oldPos:
+            self.eraseRect(op[0], op[1])
         for p in self.coloredPosition:
             self.eraseRect(p[0], p[1])
 

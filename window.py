@@ -1,10 +1,10 @@
-from PyQt5.QtWidgets import QLabel, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout
+from PyQt5.QtWidgets import QLabel, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QCheckBox
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
-from canvas import CanvasView, CanvasScrollArea
+from canvas import CanvasView
 from MVC import Controller, Model
-from buttons import StartButton, StepButton, StopButton, ClearButton, KnownPatternsBox
+from buttons import StartButton, StepButton, StopButton, ClearButton, KnownPatternsBox, HistoryCheckBox
 from slider import FPSSlider
 
 
@@ -28,12 +28,12 @@ class MainWindow(QMainWindow):
         pixmap.fill(Qt.white)
         model = Model(self.squareEdge, pixmap.width(), pixmap.height())
         canvas = CanvasView(pixmap, model)
+        historyCheckBox = HistoryCheckBox(canvas)
         knownPatternBox = KnownPatternsBox(model)
         controller = Controller(model, canvas, knownPatternBox)
         canvas.addController(controller)
         knownPatternBox.addController(controller)
         canvas.setFixedSize(self.numCols * self.squareEdge + 1, self.numRows * self.squareEdge + 1)
-        #scroll = CanvasScrollArea(canvas, self.numCols * self.squareEdge + 1, self.numRows * self.squareEdge + 1)
 
         # buttons initialization and layout definition (as a list of widgets)
         buttons = []
@@ -43,6 +43,7 @@ class MainWindow(QMainWindow):
         buttons.append(StepButton(controller))
         buttons.append(ClearButton(controller))
         buttons.append(knownPatternBox)
+        buttons.append(historyCheckBox)
         buttonLayout = QVBoxLayout()
         for b in buttons:
             b.setFixedSize(100, 50)

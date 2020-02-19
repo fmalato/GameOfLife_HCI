@@ -1,6 +1,6 @@
 from PyQt5.QtCore import QTimer, QObject
 from PyQt5.QtGui import QMouseEvent
-from PyQt5.QtWidgets import QPushButton, QComboBox
+from PyQt5.QtWidgets import QPushButton, QComboBox, QCheckBox
 
 
 class StartButton(QPushButton):
@@ -78,5 +78,11 @@ class KnownPatternsBox(QComboBox, QObject):
             self.controller.loadPattern(self.currentIndex())
 
 
+class HistoryCheckBox(QCheckBox):
+
+    def __init__(self, canvas):
+        super().__init__('Cells history')
+        self.canvas = canvas
+        self.stateChanged.connect(self.canvas.setHistory)
 
 

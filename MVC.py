@@ -27,6 +27,7 @@ class Model:
         self.numCols = int(self.pixmapWidth / self.squareEdge)
         self.coloredPositions = []
         self.colored = np.zeros((self.numRows, self.numCols))
+        self.oldPos = []
         self.jsonData = []
         self.patternsNames = []
 
@@ -84,12 +85,14 @@ class Model:
         tmp = []
         tmp_colored = deepcopy(self.colored[self.minX - 1: self.maxX + 2, self.minY - 1: self.maxY + 2])
         results = []
+        oldestPos = self.oldPos
+        self.oldPos = deepcopy(self.coloredPositions)
 
         # necessary to avoid a numpy bug
         if len(tmp_colored) != 0:
             itr = np.nditer(tmp_colored, flags=['multi_index'])
         else:
-            return results
+            return oldestPos, self.oldPos, results
         for x in itr:
             indexX = itr.multi_index[0]
             indexY = itr.multi_index[1]
@@ -114,17 +117,19 @@ class Model:
                     tmp.append((indexX + self.minX - 1, indexY + self.minY - 1))
         for el in tmp:
             results.append([self.updatePositions(el[0], el[1]), el[0], el[1]])
-        return results
+        return oldestPos, self.oldPos, results
 
     def clearAll(self):
 
+        op = deepcopy(self.oldPos)
         cp = deepcopy(self.coloredPositions)
         c = deepcopy(self.colored)
 
+        self.oldPos = []
         self.coloredPositions = []
         self.colored = np.zeros((self.numRows, self.numCols))
 
-        return cp, c
+        return op, cp, c
 
     def loadPattern(self, index):
         pattern = self.jsonData[self.patternsNames[index]]["pattern"]
@@ -185,7 +190,7 @@ class Controller:
     def updatePositions(self, row, col):
         create = self.model.updatePositions(row, col)
         if create:
-            self.canvasView.drawRect(row, col)
+            self.canvasView.drawRect(row, col, True)
         else:
             self.canvasView.eraseRect(row, col)
 
@@ -199,6 +204,9 @@ class Controller:
     def getNumCols(self):
         return self.model.numCols
 
+    def getOldPos(self):
+        return deepcopy(self.model.oldPos)
+
     def getColoredPositions(self):
         return deepcopy(self.model.coloredPositions)
 
@@ -209,18 +217,32 @@ class Controller:
         return self.model.loadPatternNames()
 
     def updateCells(self):
-        results = self.model.updateCells()
+        oldestPos, oldPos, results = self.model.updateCells()
+        if self.canvasView.history:
+            for el in oldestPos:
+                # erasing grandpa squares
+                self.canvasView.eraseRect(el[0], el[1])
+            for el in oldPos:
+                # drawing parent square
+                self.canvasView.drawRect(el[0], el[1], False)
         for el in results:
+            # drawing the current generation
             if el[0]:
-                self.canvasView.drawRect(el[1], el[2])
+                self.canvasView.drawRect(el[1], el[2], True)
             else:
-                self.canvasView.eraseRect(el[1], el[2])
+                if self.canvasView.history:
+                    if (el[1], el[2]) not in oldPos:
+                        self.canvasView.eraseRect(el[1], el[2])
+                else:
+                    self.canvasView.eraseRect(el[1], el[2])
 
     def clearAll(self):
-        cp, c = self.model.clearAll()
+        op, cp, c = self.model.clearAll()
+        self.canvasView.oldPos = op
         self.canvasView.coloredPosition = cp
         self.canvasView.colored = c
         self.canvasView.clearAll()
+        self.canvasView.oldPos = self.getOldPos()
         self.canvasView.coloredPosition = self.getColoredPositions()
         self.canvasView.colored = self.getColored()
 
@@ -228,4 +250,4 @@ class Controller:
         self.clearAll()
         positions = self.model.loadPattern(index)
         for p in positions:
-            self.canvasView.drawRect(p[0], p[1])
+            self.canvasView.drawRect(p[0], p[1], True)
