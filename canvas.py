@@ -16,6 +16,8 @@ class CanvasView(QLabel):
         self.numCols = 0
         self.squareEdge = 0
 
+        # oldPos doesn't require the colored pixels map, since it's just a graphical effect but doesn't affect the
+        # next generation at all
         self.oldPos = []
         self.coloredPosition = []
         self.colored = []
@@ -30,13 +32,16 @@ class CanvasView(QLabel):
         self.pixmapWidth = self.pixmap().width()
         self.pixmapHeight = self.pixmap().height()
 
-        # also, in order to paint, first you need a painter
+        # also, in order to paint, first you need a painter. It has two brushes to paint two different types of
+        # squares (new and old)
         self.painter = QPainter(self.pixmap())
         self.painter.setPen(QPen(Qt.black))
         self.brush = QBrush(Qt.green)
         self.oldBrush = QBrush(Qt.red)
         self.painter.setBrush(self.brush)
 
+    # when self.history switches from True to False, you need to get the latest oldPos and erase all its squares.
+    # Then, since there could be some intersections, you also need to get the latest position and redraw it.
     def setHistory(self):
         self.history = not self.history
         if not self.history:
@@ -106,14 +111,6 @@ class CanvasView(QLabel):
 
         self.window().update()
 
-
-class CanvasScrollArea(QScrollArea):
-
-    def __init__(self, canvas, width, height):
-        super().__init__()
-        self.setWidgetResizable(True)
-        self.setWidget(canvas)
-        self.setFixedSize(width, height)
 
 
 

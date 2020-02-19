@@ -132,6 +132,7 @@ class Model:
         return op, cp, c
 
     def loadPattern(self, index):
+        # getting the useful pieces of information
         pattern = self.jsonData[self.patternsNames[index]]["pattern"]
         posX = self.jsonData[self.patternsNames[index]]["position"][0]
         posY = self.jsonData[self.patternsNames[index]]["position"][1]
@@ -144,11 +145,13 @@ class Model:
                     if pattern[r][c] == 1:
                         self.appendPosition(r + posX, c + posY)
         else:
+            # if a pattern is too large to be drawn in the window, a little popup appears
             self.showErrorPopup()
 
         return deepcopy(self.coloredPositions)
 
     def loadPatternNames(self):
+        # this is called when the KnownPatternsBox is instantiated
         with open('patterns.json', 'r') as f:
             self.jsonData = json.load(f)
             self.patternsNames = list(self.jsonData.keys())
@@ -216,6 +219,8 @@ class Controller:
     def getPatternsNames(self):
         return self.model.loadPatternNames()
 
+    # the main method of the Controller: the model updates the cells according to the game rules, then gives back the
+    # updated positions and the Controller tells the view what to do accordingly to the model's data.
     def updateCells(self):
         oldestPos, oldPos, results = self.model.updateCells()
         if self.canvasView.history:
@@ -236,12 +241,16 @@ class Controller:
                 else:
                     self.canvasView.eraseRect(el[1], el[2])
 
+    # a bit messy, but since there's the history to handle I couldn't avoid that
     def clearAll(self):
         op, cp, c = self.model.clearAll()
+        # update accordingly to the last model's data
         self.canvasView.oldPos = op
         self.canvasView.coloredPosition = cp
         self.canvasView.colored = c
+        # perform the cleanUp in the view
         self.canvasView.clearAll()
+        # set the view state to the current model state
         self.canvasView.oldPos = self.getOldPos()
         self.canvasView.coloredPosition = self.getColoredPositions()
         self.canvasView.colored = self.getColored()

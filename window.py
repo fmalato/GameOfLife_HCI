@@ -1,11 +1,12 @@
-from PyQt5.QtWidgets import QLabel, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QCheckBox
+from PyQt5.QtWidgets import QLabel, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 
 from canvas import CanvasView
 from MVC import Controller, Model
-from buttons import StartButton, StepButton, StopButton, ClearButton, KnownPatternsBox, HistoryCheckBox
-from slider import FPSSlider
+from buttons import KnownPatternsBox
+
+from utils import createButtonsForGUI, generateLabelsForGUI
 
 
 class MainWindow(QMainWindow):
@@ -23,27 +24,23 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(widget)
         self.setWindowTitle("Conway's Game of Life")
 
-        # canvas
+        # since the Canvas object is the core of the GUI, its definition is a bit messy
         pixmap = QPixmap(self.squareEdge * self.numCols + 1, self.squareEdge * self.numRows + 1)
         pixmap.fill(Qt.white)
+        # model of the MVC
         model = Model(self.squareEdge, pixmap.width(), pixmap.height())
+        # views of the MVC, getting the model as argument
         canvas = CanvasView(pixmap, model)
-        historyCheckBox = HistoryCheckBox(canvas)
         knownPatternBox = KnownPatternsBox(model)
+        # controller of the MVC
         controller = Controller(model, canvas, knownPatternBox)
         canvas.addController(controller)
         knownPatternBox.addController(controller)
+        # an useful canvas property
         canvas.setFixedSize(self.numCols * self.squareEdge + 1, self.numRows * self.squareEdge + 1)
 
         # buttons initialization and layout definition (as a list of widgets)
-        buttons = []
-        start = StartButton(controller)
-        buttons.append(start)
-        buttons.append(StopButton(start.timer))
-        buttons.append(StepButton(controller))
-        buttons.append(ClearButton(controller))
-        buttons.append(knownPatternBox)
-        buttons.append(historyCheckBox)
+        fpsSlider, buttons = createButtonsForGUI(canvas, knownPatternBox, controller)
         buttonLayout = QVBoxLayout()
         for b in buttons:
             b.setFixedSize(100, 50)
@@ -56,18 +53,16 @@ class MainWindow(QMainWindow):
         """
 
         # two simple boxes: three labels and an FPSSlider, all aligned horizontally
+        fpsLabel, minLabel = generateLabelsForGUI()
+        # assembling the label layout
         sliderLayout = QHBoxLayout()
-        fpsLabel = QLabel('FPS:')
-        fpsLabel.setFixedWidth(30)
-        minLabel = QLabel('1')
-        minLabel.setFixedWidth(10)
         sliderLayout.addWidget(fpsLabel)
         sliderLayout.addWidget(minLabel)
-        sliderLayout.addWidget(FPSSlider(start))
+        sliderLayout.addWidget(fpsSlider)
         sliderLayout.addWidget(QLabel('60'))
 
-        # canvas is defined as an horizontal layout formed by two containers, containing the Canvas object and a
-        # bunch of buttons respectively
+        # canvasLayout is defined as an horizontal layout formed by two containers, containing the Canvas object on the
+        # left and the buttonLayout with all of its buttons on the right.
         canvasLayout = QHBoxLayout()
         canvasLayout.addWidget(canvas)
         canvasLayout.addLayout(buttonLayout)

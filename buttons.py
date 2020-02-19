@@ -78,6 +78,11 @@ class KnownPatternsBox(QComboBox, QObject):
             self.controller.loadPattern(self.currentIndex())
 
 
+"""
+    This is a switch on the canvas' history attribute. With this dummy class declaration you are able to switch from
+    'history mode' to 'present mode' in realtime just by declaring this object in the MainWindow.
+    In the end, it exists just because of code readability.
+"""
 class HistoryCheckBox(QCheckBox):
 
     def __init__(self, canvas):
