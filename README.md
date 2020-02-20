@@ -3,6 +3,7 @@ A simple Python "Conway's Game of Life" implementation with PyQt5.
 The game implements a finite grid and comes with a bunch features such as pattern loading, variable framerate and cells history.
 
 ## Requirements
+I've been using an Anaconda environment with the following packages:
 - Pyton 3.x
 - PyQt 5.9.2
 - numpy 1.18.1
