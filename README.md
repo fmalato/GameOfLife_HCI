@@ -1,4 +1,5 @@
 # Conway's Game of Life
+![test image size](/images/gui.png){:height="200px" width="200px"}
 <img url="https://raw.githubusercontent.com/freaky1310/GameOfLife_HCI/master/images/gui.png" width=200 height=200/>
 ![pattern](https://raw.githubusercontent.com/freaky1310/GameOfLife_HCI/master/images/pattern.png)
 A simple Python "Conway's Game of Life" implementation with PyQt5.
