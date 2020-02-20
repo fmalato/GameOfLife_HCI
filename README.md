@@ -9,7 +9,7 @@ I've been using an Anaconda environment with the following packages:
 - numpy 1.18.1
 
 ## Installation
-To run this project, just clone it and run _main.py_.
+To run this project, just clone it, set the virtual environment and run _main.py_.
 
 ## Known issues
 Being defined over a two dimensional grid, the game will slow down on complex patterns when setting large grids.
