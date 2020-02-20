@@ -1,7 +1,7 @@
 # Conway's Game of Life
 
-<img src="https://raw.githubusercontent.com/freaky1310/GameOfLife_HCI/master/images/gui.png" width=200 height=200/>
-![pattern](https://raw.githubusercontent.com/freaky1310/GameOfLife_HCI/master/images/pattern.png)
+<img src="https://raw.githubusercontent.com/freaky1310/GameOfLife_HCI/master/images/gui.png" width=400 height=300/>
+<img src="https://raw.githubusercontent.com/freaky1310/GameOfLife_HCI/master/images/pattern.png" width=400 height=300/>
 A simple Python "Conway's Game of Life" implementation with PyQt5.
 The game implements a finite grid and comes with a bunch of features such as pattern loading, variable framerate and cells history.
 For further information about the project structure or the strategies that I've been using, read the _GOF.pdf_ report.
