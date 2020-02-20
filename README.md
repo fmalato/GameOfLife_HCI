@@ -1,6 +1,6 @@
 # Conway's Game of Life
 A simple Python "Conway's Game of Life" implementation with PyQt5.
-The game implements a finite grid and comes with a bunch features such as pattern loading, variable framerate and cells history.
+The game implements a finite grid and comes with a bunch of features such as pattern loading, variable framerate and cells history.
 For further information about the project structure or the strategies that I've been using, read the _GOF.pdf_ report.
 
 ## Requirements
