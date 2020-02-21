@@ -30,6 +30,7 @@ class Model:
         self.oldPos = []
         self.jsonData = []
         self.patternsNames = []
+        self.loadJSON()
 
         # no need to pass the following attributes
         self.minX = 0
@@ -121,15 +122,10 @@ class Model:
 
     def clearAll(self):
 
-        op = deepcopy(self.oldPos)
-        cp = deepcopy(self.coloredPositions)
-        c = deepcopy(self.colored)
-
         self.oldPos = []
         self.coloredPositions = []
         self.colored = np.zeros((self.numRows, self.numCols))
 
-        return op, cp, c
 
     def loadPattern(self, index):
         # getting the useful pieces of information
@@ -150,12 +146,11 @@ class Model:
 
         return deepcopy(self.coloredPositions)
 
-    def loadPatternNames(self):
+    def loadJSON(self):
         # this is called when the KnownPatternsBox is instantiated
         with open('patterns.json', 'r') as f:
             self.jsonData = json.load(f)
             self.patternsNames = list(self.jsonData.keys())
-            return deepcopy(self.patternsNames)
 
     def showErrorPopup(self):
         msg = QMessageBox()
@@ -197,28 +192,6 @@ class Controller:
         else:
             self.canvasView.eraseRect(row, col)
 
-    # A bunch of getters I couldn't avoid...
-    def getSquareEdge(self):
-        return self.model.squareEdge
-
-    def getNumRows(self):
-        return self.model.numRows
-
-    def getNumCols(self):
-        return self.model.numCols
-
-    def getOldPos(self):
-        return deepcopy(self.model.oldPos)
-
-    def getColoredPositions(self):
-        return deepcopy(self.model.coloredPositions)
-
-    def getColored(self):
-        return deepcopy(self.model.colored)
-
-    def getPatternsNames(self):
-        return self.model.loadPatternNames()
-
     # the main method of the Controller: the model updates the cells according to the game rules, then gives back the
     # updated positions and the Controller tells the view what to do accordingly to the model's data.
     def updateCells(self):
@@ -243,17 +216,10 @@ class Controller:
 
     # a bit messy, but since there's the history to handle I couldn't avoid that
     def clearAll(self):
-        op, cp, c = self.model.clearAll()
-        # update accordingly to the last model's data
-        self.canvasView.oldPos = op
-        self.canvasView.coloredPosition = cp
-        self.canvasView.colored = c
         # perform the cleanUp in the view
         self.canvasView.clearAll()
-        # set the view state to the current model state
-        self.canvasView.oldPos = self.getOldPos()
-        self.canvasView.coloredPosition = self.getColoredPositions()
-        self.canvasView.colored = self.getColored()
+        self.model.clearAll()
+
 
     def loadPattern(self, index):
         self.clearAll()

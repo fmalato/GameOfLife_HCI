@@ -11,17 +11,6 @@ class CanvasView(QLabel):
         self.model = model
         self.controller = None
 
-        # initial state, inconsistent if there's no controller
-        self.numRows = 0
-        self.numCols = 0
-        self.squareEdge = 0
-
-        # oldPos doesn't require the colored pixels map, since it's just a graphical effect but doesn't affect the
-        # next generation at all
-        self.oldPos = []
-        self.coloredPosition = []
-        self.colored = []
-
         self.history = False
 
         # some standard attributes initializations
@@ -29,8 +18,8 @@ class CanvasView(QLabel):
         self.setPixmap(pixmap)
 
         # these attributes are useful for drawing on the canvas
-        self.pixmapWidth = self.pixmap().width()
-        self.pixmapHeight = self.pixmap().height()
+        self.pixmapWidth = self.model.pixmapWidth
+        self.pixmapHeight = self.model.pixmapHeight
 
         # also, in order to paint, first you need a painter. It has two brushes to paint two different types of
         # squares (new and old)
@@ -45,11 +34,9 @@ class CanvasView(QLabel):
     def setHistory(self):
         self.history = not self.history
         if not self.history:
-            self.oldPos = self.controller.getOldPos()
-            for el in self.oldPos:
+            for el in self.model.oldPos:
                 self.eraseRect(el[0], el[1])
-            self.coloredPosition = self.controller.getColoredPositions()
-            for el in self.coloredPosition:
+            for el in self.model.coloredPositions:
                 self.drawRect(el[0], el[1], True)
 
     """
@@ -61,19 +48,12 @@ class CanvasView(QLabel):
     def addController(self, controller):
         self.controller = controller
 
-        self.numRows = self.controller.getNumRows()
-        self.numCols = self.controller.getNumCols()
-        self.squareEdge = self.controller.getSquareEdge()
-
-        self.oldPos = self.controller.getOldPos()
-        self.coloredPosition = self.controller.getColoredPositions()
-        self.colored = self.controller.getColored()
-
     def mousePressEvent(self, ev: QMouseEvent):
         # updatePosition() is one of the major function of the model class. It is used to update the grid state,
         # then it notifies the changes to the view which draws the rectangle.
         if self.controller is not None:
-            self.controller.updatePositions(int(ev.pos().y() / self.squareEdge), int(ev.pos().x() / self.squareEdge))
+            self.controller.updatePositions(int(ev.pos().y() / self.model.squareEdge),
+                                            int(ev.pos().x() / self.model.squareEdge))
 
         # to make the colored square appear, we need to update the window
         self.window().update()
@@ -83,30 +63,31 @@ class CanvasView(QLabel):
         # draw a grid just by drawing lines between the right couple of points
         x = 0
         y = 0
-        for i in range(self.numRows + 1):
-            self.painter.drawLine(0, y, self.squareEdge * self.numCols, y)
-            y += self.squareEdge
-        for j in range(self.numCols + 1):
-            self.painter.drawLine(x, 0, x, self.squareEdge * self.numRows)
-            x += self.squareEdge
+        for i in range(self.model.numRows + 1):
+            self.painter.drawLine(0, y, self.model.squareEdge * self.model.numCols, y)
+            y += self.model.squareEdge
+        for j in range(self.model.numCols + 1):
+            self.painter.drawLine(x, 0, x, self.model.squareEdge * self.model.numRows)
+            x += self.model.squareEdge
 
     def drawRect(self, row, col, isNew):
         if isNew:
             self.painter.setBrush(self.brush)
         else:
             self.painter.setBrush(self.oldBrush)
-        self.painter.drawRect(col * self.squareEdge, row * self.squareEdge, self.squareEdge, self.squareEdge)
+        self.painter.drawRect(col * self.model.squareEdge, row * self.model.squareEdge, self.model.squareEdge,
+                              self.model.squareEdge)
         self.window().update()
 
     def eraseRect(self, row, col):
-        self.painter.eraseRect(col * self.squareEdge + 1, row * self.squareEdge + 1, self.squareEdge - 1,
-                               self.squareEdge - 1)
+        self.painter.eraseRect(col * self.model.squareEdge + 1, row * self.model.squareEdge + 1,
+                               self.model.squareEdge - 1, self.model.squareEdge - 1)
         self.window().update()
 
     def clearAll(self):
-        for op in self.oldPos:
+        for op in self.model.oldPos:
             self.eraseRect(op[0], op[1])
-        for p in self.coloredPosition:
+        for p in self.model.coloredPositions:
             self.eraseRect(p[0], p[1])
 
         self.window().update()

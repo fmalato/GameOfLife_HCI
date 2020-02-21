@@ -69,8 +69,7 @@ class KnownPatternsBox(QComboBox, QObject):
     """
     def addController(self, controller):
         self.controller = controller
-        patternsNames = self.controller.getPatternsNames()
-        for el in patternsNames:
+        for el in self.model.patternsNames:
             self.addItem(el)
 
     def loadPattern(self):
